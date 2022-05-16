@@ -4,30 +4,33 @@ from constant import *
 from physics_engine import collision_pair_circles, friction_single_circle
 
 
-def forward_scene_capped_counting_collision(arr_obj: list[ObjectState]) -> list[int]:
+def forward_scene_capped_counting_collision(arr_obj: list[ObjectState]):
     return _recurse_euler_forward_scene_capped(arr_obj)
 
 
-def _recurse_euler_forward_scene_capped(arr_obj) -> list[int]:
+def _recurse_euler_forward_scene_capped(arr_obj):
     arr_collision_record: list[int] = []
+    list_of_records: list[list[int]] = []
     for i in range(CP):
         arr_obj, arr_collision_record_next = _euler_forward_scene_one_step(
             arr_obj, i == 0)
         arr_collision_record.extend(arr_collision_record_next)
-        # print(arr_collision_record_next)
-        print(i, arr_obj)
-        import sys
-        sys.exit(0)
-    return arr_collision_record
+        # print(i, arr_obj)
+        record: list[str] = []
+        for obj in arr_obj:
+            record += arr(obj)
+        list_of_records.append(record)
+        if i == -1:
+            import sys
+            sys.exit(0)
+    return (arr_collision_record, list_of_records)
 
 
 def _euler_forward_scene_one_step(arr_obj: list[ObjectState], first_step: bool):
     arr_obj_nxt, arr_collision_boundary, arr_collision_record = _recurse_euler_step_single_circle_aabb_boundary(
         arr_obj)
-    print(arr_obj_nxt)
     collisions, dict_collision_count_init, arr_obj_after_col = _recurse_collision_handling_outer_loop(
         arr_obj, arr_obj_nxt)
-    print(arr_obj_after_col)
     arr_collision_record.extend(collisions)
     arr_obj_after_friction = _recurse_handle_friction(arr_collision_boundary,
                                                       dict_collision_count_init, first_step, arr_obj_after_col)
